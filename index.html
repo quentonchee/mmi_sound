@@ -550,6 +550,59 @@
       .buzzer-name { width: 120px; font-size: 0.85rem; bottom: -30px; }
       .wave-indicator { top: -35px; }
     }
+  
+    /* ─── UPLOAD FULL COLLAPSE ─── */
+    .upload-collapse {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s, margin 0.3s;
+      margin-bottom: 0;
+    }
+    .upload-collapse.open {
+      max-height: 800px;
+      opacity: 1;
+      margin-bottom: 40px;
+      transition: max-height 0.6s ease-in-out, opacity 0.4s 0.1s, margin 0.4s;
+    }
+    
+    /* ─── FAB ADD BUTTON ─── */
+    .fab-add {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 2.5rem;
+      border: none;
+      box-shadow: 0 8px 25px rgba(255,118,165,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+      z-index: 100;
+      line-height: 1;
+    }
+    .fab-add:hover {
+      transform: scale(1.1);
+      background: var(--accent3);
+      box-shadow: 0 12px 30px rgba(254,111,23,0.4);
+    }
+    .fab-add.rotate {
+      transform: rotate(135deg);
+      background: var(--danger);
+      box-shadow: 0 8px 25px rgba(250,82,82,0.4);
+    }
+    
+    /* ─── MEDIA QUERY ADDITIONS ─── */
+    @media (max-width: 600px) {
+      .fab-add { bottom: 20px; right: 20px; width: 60px; height: 60px; font-size: 2rem; }
+    }
+
   </style>
 
   <!-- React & ReactDOM -->
@@ -610,7 +663,8 @@
     function App() {
       const [sounds, setSounds] = useState([]);
       const [toasts, setToasts] = useState([]);
-      const [searchFilter, setSearchFilter] = useState('');
+      const [searchFilter, setSearchFilter] = useState(\'\');
+      const [isUploadOpen, setIsUploadOpen] = useState(false);
       
       const [selectedEmoji, setSelectedEmoji] = useState(EMOJIS[0]);
       const [selectedColor, setSelectedColor] = useState(COLORS[0].val);
@@ -793,17 +847,17 @@
         <div className="wrapper">
           <header>
             <div className="logo">
-              <span className="logo-icon">🎛️</span> MMI SoundBoard (React Cloud)
+              <span className="logo-icon">🎛️</span> MMI SoundBoard
             </div>
-            <p>Développé avec React — Partagez vos sons avec tout le monde !</p>
+            
           </header>
 
           <div className="stats-bar">
             <div className="stat-chip">🎵 Sons enregistrés : <span>{sounds.length}</span></div>
-            <div className="stat-chip">💾 Stockage global : <span>{totalSize}</span></div>
-            <div className="stat-chip">🕐 Son joué : <span>{lastPlayedName}</span></div>
+            
           </div>
 
+          <div className={`upload-collapse ${isUploadOpen ? 'open' : ''}`}>
           <div 
             className="upload-section" 
             onDragOver={e => e.preventDefault()}
@@ -863,6 +917,7 @@
             </div>
             <input type="file" ref={fileInputRef} style={{display:'none'}} accept="audio/*" multiple onChange={handleFileChange} />
           </div>
+          </div>
 
           <div className="section-header">
             <div className="section-title">
@@ -873,6 +928,7 @@
               <span className="search-icon">🔍</span>
               <input 
                 type="text" 
+                id="searchInput"
                 className="input-field" 
                 placeholder="Rechercher..." 
                 value={searchFilter}
@@ -912,6 +968,7 @@
             )}
           </div>
 
+          <button className={`fab-add ${isUploadOpen ? 'rotate' : ''}`} onClick={() => setIsUploadOpen(!isUploadOpen)}>➕</button>
           <footer>MMI SoundBoard &copy; 2026 · Propulsé par React & Firebase</footer>
           <Toast toasts={toasts} />
 
