@@ -717,7 +717,7 @@
             continue;
           }
 
-          addToast(`⏳ Conversion et envoi de "${finalName}"...`, 'info');
+          addToast(`⏳ Conversion du son en texte (1/2)...`, 'info');
 
           try {
             const url = await new Promise((resolve, reject) => {
@@ -727,7 +727,9 @@
               reader.onerror = error => reject(error);
             });
 
-            await db.collection("sounds").add({
+            addToast(`🚀 Envoi vers Firestore (2/2)...`, 'info');
+
+            const addPromise = db.collection("sounds").add({
               name: finalName,
               type: file.type,
               size: file.size,
@@ -737,10 +739,19 @@
               url: url,
               addedAt: new Date().toISOString()
             });
+
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_FIRESTORE")), 8000));
+            
+            await Promise.race([addPromise, timeoutPromise]);
+            
             importedCount++;
           } catch(err) {
             console.error(err);
-            addToast(`❌ Erreur pour "${finalName}"`, 'error');
+            if (err.message === "TIMEOUT_FIRESTORE") {
+               addToast(`❌ Impossible de se connecter à Firestore. Avez-vous cliqué sur "Firestore Database" (orange) ou sur l'autre ?`, 'error');
+            } else {
+               addToast(`❌ Erreur: Firebase a refusé (Mode test désactivé ?)`, 'error');
+            }
           }
         }
         
