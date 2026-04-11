@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMI SoundBoard 🎵 (React Cloud Edition)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── DESIGN TOKENS ─── */
+    :root {
+      --bg:        #0a0b14;
+      --surface:   #12141f;
+      --surface2:  #1a1d2e;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #7c5cfc;
+      --accent2:   #e040fb;
+      --accent3:   #00e5ff;
+      --text:      #e8eaf6;
+      --muted:     #6b6f8a;
+      --danger:    #ff4560;
+      --success:   #00e676;
+      --radius:    14px;
+      --shadow:    0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND GLOW ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,92,252,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(224,64,251,0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── LAYOUT ─── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .logo-icon {
+      font-size: 2.4rem;
+      -webkit-text-fill-color: initial;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 10px;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stat-chip span { color: var(--text); font-weight: 600; }
+
+    /* ─── UPLOAD ZONE ─── */
+    .upload-section {
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(124,92,252,0.04), rgba(224,64,251,0.04));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .upload-section:hover,
+    .upload-section.drag-over {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .upload-section:hover::before,
+    .upload-section.drag-over::before { opacity: 1; }
+    .upload-section.drag-over { border-color: var(--accent2); background: rgba(224,64,251,0.05); }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .upload-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .upload-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ─── RENAME INPUT ─── */
+    .upload-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .upload-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 480px;
+    }
+    .input-field {
+      flex: 1;
+      min-width: 180px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+    }
+    .input-field::placeholder { color: var(--muted); }
+
+    /* ─── EMOJI PICKER ─── */
+    .emoji-picker {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .emoji-btn {
+      background: var(--surface2);
+      border: 1.5px solid transparent;
+      border-radius: 8px;
+      width: 38px; height: 38px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s, background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .emoji-btn:hover { background: var(--surface); transform: scale(1.15); }
+    .emoji-btn.selected { border-color: var(--accent); background: rgba(124,92,252,0.18); }
+
+    /* ─── COLOR PICKER ROW ─── */
+    .color-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .color-swatch {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .color-swatch:hover { transform: scale(1.2); }
+    .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.2s, filter 0.15s;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,92,252,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(124,92,252,0.5); filter: brightness(1.1); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger {
+      background: rgba(255,69,96,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(255,69,96,0.2);
+    }
+    .btn-danger:hover { background: rgba(255,69,96,0.22); }
+
+    /* ─── FILE INPUT HIDDEN ─── */
+    #fileInput { display: none; }
+
+    /* ─── SECTION HEADER ─── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border-radius: 50px;
+      padding: 3px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    /* ─── SEARCH ─── */
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 240px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+    }
+
+    /* ─── BUZZER GRID ─── */
+    .buzzer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 18px;
+    }
+
+    /* ─── BUZZER CARD ─── */
+    .buzzer-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 16px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.2s, border-color 0.2s;
+      overflow: hidden;
+      user-select: none;
+    }
+    .buzzer-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-color, linear-gradient(135deg, rgba(124,92,252,0.08), rgba(0,229,255,0.05)));
+      opacity: 0.6;
+      transition: opacity 0.25s;
+    }
+    .buzzer-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .buzzer-card:hover::before { opacity: 1; }
+    .buzzer-card:active { transform: scale(0.97); }
+
+    .buzzer-card.playing {
+      animation: pulse-card 0.4s ease;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.25), 0 12px 40px rgba(0,0,0,0.4);
+    }
+    @keyframes pulse-card {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .buzzer-emoji {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s;
+    }
+    .buzzer-card:hover .buzzer-emoji { transform: scale(1.2) rotate(5deg); }
+
+    .buzzer-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      position: relative; z-index: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .buzzer-duration {
+      font-size: 0.72rem;
+      color: var(--muted);
+      position: relative; z-index: 1;
+      margin-top: 4px;
+    }
+
+    /* Playing wave indicator */
+    .wave-indicator {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      height: 20px;
+      margin-top: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      position: relative; z-index: 1;
+    }
+    .buzzer-card.playing .wave-indicator { opacity: 1; }
+    .wave-bar {
+      width: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: wave-anim 0.8s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; background: var(--accent2); }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.05s; background: var(--accent2); }
+    @keyframes wave-anim {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+
+
+
+    /* ─── EDIT BUTTON ON CARD ─── */
+    .card-edit {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: rgba(124,92,252,0.12);
+      border: none;
+      border-radius: 6px;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      color: var(--accent);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.15s;
+      z-index: 10;
+    }
+    .buzzer-card:hover .card-edit { opacity: 1; }
+    .card-edit:hover { background: rgba(124,92,252,0.28); }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+    .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ─── TOAST ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 30px; right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      animation: slide-in 0.3s ease forwards;
+      max-width: 320px;
+    }
+    .toast.success { border-color: rgba(0,230,118,0.3); }
+    .toast.error   { border-color: rgba(255,69,96,0.3); }
+    @keyframes slide-in {
+      from { transform: translateX(100px); opacity: 0; }
+      to   { transform: translateX(0);     opacity: 1; }
+    }
+    @keyframes slide-out {
+      from { transform: translateX(0);     opacity: 1; }
+      to   { transform: translateX(100px); opacity: 0; }
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 90%;
+      max-width: 460px;
+      box-shadow: var(--shadow);
+      transform: translateY(20px) scale(0.96);
+      transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: none; }
+    .modal h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .modal-form { display: flex; flex-direction: column; gap: 16px; }
+    .modal-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; justify-content: flex-end; }
+
+    /* ─── VOLUME SLIDER ─── */
+    .volume-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 8px;
+    }
+    .volume-row label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(124,92,252,0.4);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding-top: 40px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .logo { font-size: 2rem; }
+      .buzzer-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    }
+  </style>
+
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- JSX Compiler (Babel standalone) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Firebase Compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // 🔸 CONFIGURATION FIREBASE À REMPLACER 🔸
+    const firebaseConfig = {
+      apiKey: "VOTRE_API_KEY",
+      authDomain: "VOTRE_PROJET.firebaseapp.com",
+      projectId: "VOTRE_PROJET",
+      storageBucket: "VOTRE_PROJET.appspot.com",
+      messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+      appId: "VOTRE_APP_ID"
+    };
+
+    // Firebase INIT
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    const EMOJIS = ['🎵','🎶','🔔','🎸','🥁','🎹','🎺','🎻','🎙','📯','🔊','💥','🎉','🚨','🌊','🌟','🔥','💫','🎮','🕹'];
+    const COLORS = [
+      { name: 'purple', val: 'linear-gradient(135deg,rgba(124,92,252,0.15),rgba(224,64,251,0.08))' },
+      { name: 'cyan',   val: 'linear-gradient(135deg,rgba(0,229,255,0.14),rgba(0,176,255,0.07))' },
+      { name: 'green',  val: 'linear-gradient(135deg,rgba(0,230,118,0.14),rgba(0,191,165,0.07))' },
+      { name: 'orange', val: 'linear-gradient(135deg,rgba(255,167,38,0.14),rgba(255,109,0,0.07))' },
+      { name: 'pink',   val: 'linear-gradient(135deg,rgba(236,64,122,0.14),rgba(255,64,129,0.07))' },
+      { name: 'red',    val: 'linear-gradient(135deg,rgba(255,69,96,0.14),rgba(211,47,47,0.07))' },
+      { name: 'yellow', val: 'linear-gradient(135deg,rgba(255,235,59,0.14),rgba(255,193,7,0.07))' },
+      { name: 'mono',   val: 'linear-gradient(135deg,rgba(255,255,255,0.06),rgba(200,200,200,0.03))' }
+    ];
+    const COLOR_SWATCHES = ['#7c5cfc','#00e5ff','#00e676','#ffa726','#ec407a','#ff4560','#ffeb3b','#aab4d0'];
+
+    const Toast = ({ toasts }) => (
+      <div className="toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast ${t.type}`} style={{animation: t.closing ? 'slide-out 0.3s ease forwards' : 'slide-in 0.3s ease forwards'}}>
+            <span>{t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : 'ℹ️'}</span>
+            <span>{t.msg}</span>
+          </div>
+        ))}
+      </div>
+    );
+
+    function App() {
+      const [sounds, setSounds] = useState([]);
+      const [toasts, setToasts] = useState([]);
+      const [searchFilter, setSearchFilter] = useState('');
+      
+      const [selectedEmoji, setSelectedEmoji] = useState(EMOJIS[0]);
+      const [selectedColor, setSelectedColor] = useState(COLORS[0].val);
+      const [customName, setCustomName] = useState('');
+      
+      const [playingId, setPlayingId] = useState(null);
+      const [lastPlayedName, setLastPlayedName] = useState('–');
+      const audioRef = useRef(null);
+      const fileInputRef = useRef(null);
+
+      const [editModalOpen, setEditModalOpen] = useState(false);
+      const [editingSound, setEditingSound] = useState(null);
+      const [editName, setEditName] = useState('');
+      const [editEmoji, setEditEmoji] = useState('');
+      const [editColor, setEditColor] = useState('');
+      const [editVolume, setEditVolume] = useState(100);
+
+      const addToast = (msg, type = 'success') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, msg, type }]);
+        setTimeout(() => {
+          setToasts(prev => prev.map(t => t.id === id ? { ...t, closing: true } : t));
+          setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+          }, 300);
+        }, 3000);
+      };
+
+      useEffect(() => {
+        try {
+          const unsubscribe = db.collection('sounds').orderBy('addedAt').onSnapshot((snapshot) => {
+            const data = [];
+            snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+            setSounds(data);
+          }, err => {
+            console.error(err);
+            // Ignore error log if default empty config is failing
+            if (!String(err).includes("API key")) {
+                addToast('Erreur DB Firebase', 'error');
+            }
+          });
+          return () => unsubscribe();
+        } catch(e) {
+          console.error("Firebase info:", e);
+        }
+      }, []);
+
+      const formatBytes = (b) => {
+        if (b < 1024) return b + ' o';
+        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' Ko';
+        return (b / (1024 * 1024)).toFixed(2) + ' Mo';
+      };
+
+      const totalSize = formatBytes(sounds.reduce((acc, s) => acc + (s.size || 0), 0));
+      const filteredSounds = sounds.filter(s => s.name.toLowerCase().includes(searchFilter.toLowerCase()));
+
+      const playSound = (sound) => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        const audio = new Audio(sound.url);
+        audio.volume = (sound.volume ?? 100) / 100;
+        audioRef.current = audio;
+        
+        setPlayingId(sound.id);
+        setLastPlayedName(sound.name);
+
+        audio.play().catch(() => addToast('Impossible de lire ce son', 'error'));
+        audio.onended = () => {
+          setPlayingId(null);
+          audioRef.current = null;
+        };
+      };
+
+      const handleFileChange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+        e.target.value = '';
+
+        let importedCount = 0;
+        for (const file of files) {
+          if (!file.type.startsWith('audio/')) {
+            addToast(`${file.name} n'est pas audio`, 'error');
+            continue;
+          }
+
+          const fallbackName = file.name.replace(/\.[^/.]+$/, '');
+          const finalName = customName.trim() || fallbackName;
+
+          const isDup = sounds.some(s => s.size === file.size || s.name.toLowerCase() === finalName.toLowerCase());
+          if (isDup) {
+            addToast(`"${finalName}" existe déjà`, 'error');
+            continue;
+          }
+
+          addToast(`⏳ Envoi de "${finalName}" sur le cloud...`, 'info');
+
+          try {
+            const ref = storage.ref('sounds/' + Date.now() + '_' + file.name);
+            await ref.put(file);
+            const url = await ref.getDownloadURL();
+
+            await db.collection("sounds").add({
+              name: finalName,
+              type: file.type,
+              size: file.size,
+              emoji: selectedEmoji,
+              color: selectedColor,
+              volume: 100,
+              url: url,
+              addedAt: new Date().toISOString()
+            });
+            importedCount++;
+          } catch(err) {
+            console.error(err);
+            addToast(`❌ Erreur pour "${finalName}"`, 'error');
+          }
+        }
+        
+        if (importedCount > 0) {
+          setCustomName('');
+          addToast(`✨ ${importedCount} son(s) envoyé(s) !`);
+        }
+      };
+
+      const handleDrop = async (e) => {
+        e.preventDefault();
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+        if (files.length) {
+          handleFileChange({ target: { files, value: '' } });
+        }
+      };
+
+      const openEdit = (sound, e) => {
+        e.stopPropagation();
+        setEditingSound(sound);
+        setEditName(sound.name);
+        setEditEmoji(sound.emoji || EMOJIS[0]);
+        setEditColor(sound.color || COLORS[0].val);
+        setEditVolume(sound.volume ?? 100);
+        setEditModalOpen(true);
+      };
+
+      const saveEdit = async () => {
+        if (!editingSound) return;
+        try {
+          await db.collection("sounds").doc(editingSound.id).update({
+            name: editName.trim() || editingSound.name,
+            emoji: editEmoji,
+            color: editColor,
+            volume: parseInt(editVolume, 10)
+          });
+          setEditModalOpen(false);
+          addToast('Son modifié avec succès !', 'success');
+        } catch(e) {
+          console.error(e);
+          addToast('Erreur lors de la modification', 'error');
+        }
+      };
+
+      return (
+        <div className="wrapper">
+          <header>
+            <div className="logo">
+              <span className="logo-icon">🎛️</span> MMI SoundBoard (React Cloud)
+            </div>
+            <p>Développé avec React — Partagez vos sons avec tout le monde !</p>
+          </header>
+
+          <div className="stats-bar">
+            <div className="stat-chip">🎵 Sons enregistrés : <span>{sounds.length}</span></div>
+            <div className="stat-chip">💾 Stockage global : <span>{totalSize}</span></div>
+            <div className="stat-chip">🕐 Son joué : <span>{lastPlayedName}</span></div>
+          </div>
+
+          <div 
+            className="upload-section" 
+            onDragOver={e => e.preventDefault()}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <span className="upload-icon">🎵</span>
+            <div className="upload-title">Déposez vos fichiers MP3 ici</div>
+            <div className="upload-sub">Tous les ajouts sont sauvegardés dans le cloud pour tout le monde.</div>
+
+            <div className="upload-form" onClick={e => e.stopPropagation()}>
+              <div className="upload-row">
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Nom du son (optionnel)" 
+                  value={customName}
+                  onChange={e => setCustomName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <div className="modal-label" style={{marginBottom:'8px'}}>Choisir un emoji</div>
+                <div className="emoji-picker">
+                  {EMOJIS.map(em => (
+                    <button 
+                      key={em} 
+                      type="button"
+                      className={`emoji-btn ${selectedEmoji === em ? 'selected' : ''}`}
+                      onClick={() => setSelectedEmoji(em)}
+                    >{em}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="modal-label" style={{marginBottom:'8px'}}>Couleur du bouton</div>
+                <div className="color-row">
+                  {COLORS.map((c, i) => (
+                    <button 
+                      key={c.name}
+                      type="button"
+                      title={c.name}
+                      className={`color-swatch ${selectedColor === c.val ? 'selected' : ''}`}
+                      style={{background: COLOR_SWATCHES[i]}}
+                      onClick={() => setSelectedColor(c.val)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="upload-row" style={{justifyContent: 'center'}}>
+                <button className="btn btn-primary" type="button" onClick={() => fileInputRef.current?.click()}>
+                  <span>📂</span> Choisir un fichier
+                </button>
+              </div>
+            </div>
+            <input type="file" ref={fileInputRef} style={{display:'none'}} accept="audio/*" multiple onChange={handleFileChange} />
+          </div>
+
+          <div className="section-header">
+            <div className="section-title">
+              🎤 Buzzers Partagés
+              <span className="badge">{sounds.length}</span>
+            </div>
+            <div className="search-wrap">
+              <span className="search-icon">🔍</span>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Rechercher..." 
+                value={searchFilter}
+                onChange={e => setSearchFilter(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="buzzer-grid">
+            {filteredSounds.length === 0 ? (
+              <div className="empty-state">
+                <div className="icon">{searchFilter ? '🔍' : '🎧'}</div>
+                <p>{searchFilter ? `Aucun résultat pour "${searchFilter}"` : `Aucun son pour l'instant !`}</p>
+              </div>
+            ) : (
+              filteredSounds.map(sound => (
+                <div 
+                  key={sound.id} 
+                  className={`buzzer-card ${playingId === sound.id ? 'playing' : ''}`}
+                  style={{'--card-color': sound.color || COLORS[0].val}}
+                  onClick={() => playSound(sound)}
+                >
+                  <button className="card-edit" title="Modifier" onClick={e => openEdit(sound, e)}>✏️</button>
+                  <span className="buzzer-emoji">{sound.emoji || '🎵'}</span>
+                  <div className="buzzer-name">{sound.name}</div>
+                  <div className="wave-indicator">
+                    <div className="wave-bar"></div>
+                    <div className="wave-bar"></div>
+                    <div className="wave-bar"></div>
+                    <div className="wave-bar"></div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <footer>MMI SoundBoard &copy; 2026 · Propulsé par React & Firebase</footer>
+          <Toast toasts={toasts} />
+
+          {/* Edit Modal */}
+          <div className={`modal-overlay ${editModalOpen ? 'open' : ''}`} onClick={() => setEditModalOpen(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <h2>✏️ Modifier le son</h2>
+              <div className="modal-form">
+                <div>
+                  <div className="modal-label">Nom du son</div>
+                  <input type="text" className="input-field" style={{width:'100%'}} value={editName} onChange={e => setEditName(e.target.value)} />
+                </div>
+                <div>
+                  <div className="modal-label">Emoji</div>
+                  <div className="emoji-picker">
+                    {EMOJIS.map(em => (
+                      <button key={em} type="button" className={`emoji-btn ${editEmoji === em ? 'selected' : ''}`} onClick={() => setEditEmoji(em)}>{em}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="modal-label">Couleur</div>
+                  <div className="color-row">
+                    {COLORS.map((c, i) => (
+                      <button key={c.name} type="button" className={`color-swatch ${editColor === c.val ? 'selected' : ''}`} style={{background: COLOR_SWATCHES[i]}} onClick={() => setEditColor(c.val)} />
+                    ))}
+                  </div>
+                </div>
+                <div className="volume-row">
+                  <label>🔊 Volume</label>
+                  <input type="range" min="0" max="100" value={editVolume} onChange={e => setEditVolume(e.target.value)} />
+                  <span style={{fontSize:'0.85rem', color:'var(--muted)', minWidth:'34px'}}>{editVolume}%</span>
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="btn btn-ghost" onClick={() => setEditModalOpen(false)}>Annuler</button>
+                <button className="btn btn-primary" onClick={saveEdit}>💾 Enregistrer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
