@@ -566,7 +566,6 @@
   <!-- Firebase Compat (CDN) -->
   <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-storage-compat.js"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -590,7 +589,6 @@
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     const EMOJIS = ['🎵','🎶','🔔','🎸','🥁','🎹','🎺','🎻','🎙','📯','🔊','💥','🎉','🚨','🌊','🌟','🔥','💫','🎮','🕹'];
     const COLORS = [
@@ -705,6 +703,10 @@
             addToast(`${file.name} n'est pas audio`, 'error');
             continue;
           }
+          if (file.size > 700 * 1024) {
+            addToast(`Le son "${file.name}" est trop lourd (Max 700Ko)`, 'error');
+            continue;
+          }
 
           const fallbackName = file.name.replace(/\.[^/.]+$/, '');
           const finalName = customName.trim() || fallbackName;
@@ -715,12 +717,15 @@
             continue;
           }
 
-          addToast(`⏳ Envoi de "${finalName}" sur le cloud...`, 'info');
+          addToast(`⏳ Conversion et envoi de "${finalName}"...`, 'info');
 
           try {
-            const ref = storage.ref('sounds/' + Date.now() + '_' + file.name);
-            await ref.put(file);
-            const url = await ref.getDownloadURL();
+            const url = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = error => reject(error);
+            });
 
             await db.collection("sounds").add({
               name: finalName,
