@@ -10,21 +10,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    /* ─── DESIGN TOKENS ─── */
+        /* ─── DESIGN TOKENS ─── */
     :root {
-      --bg:        #0a0b14;
-      --surface:   #12141f;
-      --surface2:  #1a1d2e;
-      --border:    rgba(255,255,255,0.07);
-      --accent:    #7c5cfc;
-      --accent2:   #e040fb;
-      --accent3:   #00e5ff;
-      --text:      #e8eaf6;
-      --muted:     #6b6f8a;
-      --danger:    #ff4560;
-      --success:   #00e676;
-      --radius:    14px;
-      --shadow:    0 8px 32px rgba(0,0,0,0.5);
+      --bg:        #f8f9fa;
+      --surface:   #ffffff;
+      --surface2:  #f1f3f5;
+      --border:    #e9ecef;
+      --accent:    #FF76A5;
+      --accent2:   #4EA0E2;
+      --accent3:   #FE6F17;
+      --text:      #212529;
+      --muted:     #868e96;
+      --danger:    #fa5252;
+      --success:   #40c057;
+      --radius:    16px;
+      --shadow:    0 8px 32px rgba(0,0,0,0.05);
     }
 
     /* ─── RESET ─── */
@@ -37,26 +37,6 @@
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
-    }
-
-    /* ─── BACKGROUND GLOW ─── */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(124,92,252,0.15) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -200px; right: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(224,64,251,0.1) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
     }
 
     /* ─── LAYOUT ─── */
@@ -72,28 +52,25 @@
       text-align: center;
       margin-bottom: 48px;
     }
-    .logo {
+        .logo {
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 2.8rem;
-      font-weight: 800;
-      letter-spacing: -1px;
+      color: #1a1a1a;
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: -2px;
       line-height: 1;
     }
     .logo-icon {
-      font-size: 2.4rem;
-      -webkit-text-fill-color: initial;
+      font-size: 2.8rem;
     }
     header p {
       color: var(--muted);
-      margin-top: 10px;
-      font-size: 1rem;
-      font-weight: 400;
+      margin-top: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: -0.3px;
     }
 
     /* ─── STATS BAR ─── */
@@ -256,9 +233,9 @@
     }
     .btn:active { transform: scale(0.96); }
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background: var(--accent);
       color: #fff;
-      box-shadow: 0 4px 20px rgba(124,92,252,0.35);
+      box-shadow: 0 4px 15px rgba(255,118,165,0.3);
     }
     .btn-primary:hover { box-shadow: 0 6px 28px rgba(124,92,252,0.5); filter: brightness(1.1); }
     .btn-ghost {
@@ -294,7 +271,7 @@
       gap: 10px;
     }
     .badge {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background: var(--accent);
       color: #fff;
       border-radius: 50px;
       padding: 3px 12px;
@@ -321,127 +298,123 @@
       padding: 10px 14px 10px 36px;
     }
 
-    /* ─── BUZZER GRID ─── */
+        /* ─── BUZZER GRID ─── */
     .buzzer-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 50px 20px;
+      justify-items: center;
+      padding-top: 20px;
+      margin-bottom: 50px;
     }
 
     /* ─── BUZZER CARD ─── */
     .buzzer-card {
       position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px 16px 20px;
-      text-align: center;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--card-color, #4EA0E2);
+      border: 4px solid var(--surface);
+      box-shadow: 
+        0 14px 0 var(--card-shadow, rgba(0,0,0,0.15)), 
+        0 20px 20px rgba(0,0,0,0.1),
+        inset 0 -5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: transform 0.18s, box-shadow 0.2s, border-color 0.2s;
-      overflow: hidden;
+      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: visible;
       user-select: none;
+      padding: 0;
     }
-    .buzzer-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--card-color, linear-gradient(135deg, rgba(124,92,252,0.08), rgba(0,229,255,0.05)));
-      opacity: 0.6;
-      transition: opacity 0.25s;
+    
+    .buzzer-card:hover { filter: brightness(1.05); }
+    
+    .buzzer-card:active, .buzzer-card.playing {
+      transform: translateY(10px);
+      box-shadow: 
+        0 4px 0 var(--card-shadow, rgba(0,0,0,0.15)), 
+        0 10px 15px rgba(0,0,0,0.05),
+        inset 0 -2px 5px rgba(0,0,0,0.05);
     }
-    .buzzer-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-      border-color: rgba(255,255,255,0.15);
-    }
-    .buzzer-card:hover::before { opacity: 1; }
-    .buzzer-card:active { transform: scale(0.97); }
 
-    .buzzer-card.playing {
-      animation: pulse-card 0.4s ease;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(124,92,252,0.25), 0 12px 40px rgba(0,0,0,0.4);
-    }
-    @keyframes pulse-card {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
+    .buzzer-card.playing { border-color: rgba(255,255,255,0.8); }
 
     .buzzer-emoji {
-      font-size: 2.5rem;
+      font-size: 3rem;
       display: block;
-      margin-bottom: 10px;
       position: relative;
       z-index: 1;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
       transition: transform 0.2s;
+      margin-top: -5px;
     }
-    .buzzer-card:hover .buzzer-emoji { transform: scale(1.2) rotate(5deg); }
+    .buzzer-card:hover .buzzer-emoji { transform: scale(1.15) rotate(8deg); }
 
     .buzzer-name {
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      position: absolute; 
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      text-align: center;
       color: var(--text);
-      position: relative; z-index: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .buzzer-duration {
-      font-size: 0.72rem;
-      color: var(--muted);
-      position: relative; z-index: 1;
-      margin-top: 4px;
-    }
-
-    /* Playing wave indicator */
     .wave-indicator {
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      gap: 3px;
-      height: 20px;
-      margin-top: 8px;
+      gap: 5px;
+      height: 30px;
+      position: absolute;
+      top: -45px;
       opacity: 0;
       transition: opacity 0.2s;
-      position: relative; z-index: 1;
+      z-index: 1;
     }
     .buzzer-card.playing .wave-indicator { opacity: 1; }
     .wave-bar {
-      width: 4px;
-      background: var(--accent);
-      border-radius: 2px;
-      animation: wave-anim 0.8s ease-in-out infinite;
+      width: 6px;
+      background: var(--card-color, #4EA0E2);
+      border-radius: 4px;
+      animation: wave-anim 0.6s ease-in-out infinite;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .wave-bar:nth-child(2) { animation-delay: 0.1s; background: var(--accent2); }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; background: var(--accent); }
     .wave-bar:nth-child(3) { animation-delay: 0.2s; }
-    .wave-bar:nth-child(4) { animation-delay: 0.05s; background: var(--accent2); }
-    @keyframes wave-anim {
-      0%, 100% { height: 4px; }
-      50% { height: 16px; }
-    }
-
-
+    .wave-bar:nth-child(4) { animation-delay: 0.05s; background: var(--accent3); }
+    @keyframes wave-anim { 0%, 100% { height: 8px; } 50% { height: 30px; } }
 
     /* ─── EDIT BUTTON ON CARD ─── */
     .card-edit {
       position: absolute;
-      top: 8px; left: 8px;
-      background: rgba(124,92,252,0.12);
-      border: none;
-      border-radius: 6px;
-      width: 26px; height: 26px;
+      top: 0; right: -15px; left: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 32px; height: 32px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem;
-      color: var(--accent);
+      font-size: 0.85rem;
+      color: var(--text);
       cursor: pointer;
       opacity: 0;
-      transition: opacity 0.2s, background 0.15s;
+      transition: opacity 0.2s, background 0.15s, transform 0.15s;
       z-index: 10;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .buzzer-card:hover .card-edit { opacity: 1; }
-    .card-edit:hover { background: rgba(124,92,252,0.28); }
+    .card-edit:hover { background: var(--surface2); transform: scale(1.1); }
 
     /* ─── EMPTY STATE ─── */
     .empty-state {
@@ -591,17 +564,15 @@
     const db = firebase.firestore();
 
     const EMOJIS = ['🎵','🎶','🔔','🎸','🥁','🎹','🎺','🎻','🎙','📯','🔊','💥','🎉','🚨','🌊','🌟','🔥','💫','🎮','🕹'];
-    const COLORS = [
-      { name: 'purple', val: 'linear-gradient(135deg,rgba(124,92,252,0.15),rgba(224,64,251,0.08))' },
-      { name: 'cyan',   val: 'linear-gradient(135deg,rgba(0,229,255,0.14),rgba(0,176,255,0.07))' },
-      { name: 'green',  val: 'linear-gradient(135deg,rgba(0,230,118,0.14),rgba(0,191,165,0.07))' },
-      { name: 'orange', val: 'linear-gradient(135deg,rgba(255,167,38,0.14),rgba(255,109,0,0.07))' },
-      { name: 'pink',   val: 'linear-gradient(135deg,rgba(236,64,122,0.14),rgba(255,64,129,0.07))' },
-      { name: 'red',    val: 'linear-gradient(135deg,rgba(255,69,96,0.14),rgba(211,47,47,0.07))' },
-      { name: 'yellow', val: 'linear-gradient(135deg,rgba(255,235,59,0.14),rgba(255,193,7,0.07))' },
-      { name: 'mono',   val: 'linear-gradient(135deg,rgba(255,255,255,0.06),rgba(200,200,200,0.03))' }
+        const COLORS = [
+      { name: 'Rose',   val: '#FF76A5', shadow: '#D04073' },
+      { name: 'Bleu',   val: '#4EA0E2', shadow: '#2778B6' },
+      { name: 'Orange', val: '#FE6F17', shadow: '#C84F05' },
+      { name: 'Noir',   val: '#212529', shadow: '#000000' },
+      { name: 'Vert',   val: '#40c057', shadow: '#2b8a3e' },
+      { name: 'Violet', val: '#7c5cfc', shadow: '#5635D0' },
     ];
-    const COLOR_SWATCHES = ['#7c5cfc','#00e5ff','#00e676','#ffa726','#ec407a','#ff4560','#ffeb3b','#aab4d0'];
+    const COLOR_SWATCHES = COLORS.map(c => c.val);
 
     const Toast = ({ toasts }) => (
       <div className="toast-container">
@@ -899,7 +870,10 @@
                 <div 
                   key={sound.id} 
                   className={`buzzer-card ${playingId === sound.id ? 'playing' : ''}`}
-                  style={{'--card-color': sound.color || COLORS[0].val}}
+                  style={{
+                    '--card-color': sound.color || COLORS[0].val,
+                    '--card-shadow': (COLORS.find(c => c.val === (sound.color || COLORS[0].val)) || {}).shadow || 'rgba(0,0,0,0.15)'
+                  }}
                   onClick={() => playSound(sound)}
                 >
                   <button className="card-edit" title="Modifier" onClick={e => openEdit(sound, e)}>✏️</button>
