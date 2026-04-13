@@ -693,6 +693,11 @@
         }, 3000);
       };
 
+      const soundsRef = useRef([]);
+      useEffect(() => {
+        soundsRef.current = sounds;
+      }, [sounds]);
+
       useEffect(() => {
         try {
           const unsubscribe = db.collection('sounds').orderBy('addedAt').onSnapshot((snapshot) => {
@@ -706,7 +711,27 @@
                 addToast('Erreur DB Firebase', 'error');
             }
           });
-          return () => unsubscribe();
+
+          // Écoute de l'événement de lecture globale ("TenTen" feature)
+          const pbUnsubscribe = db.collection('playback').doc('current').onSnapshot((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              // Ne jouer que si l'événement date d'il y a moins de 5 secondes
+              if (data.timestamp && (Date.now() - data.timestamp < 5000)) {
+                setTimeout(() => {
+                  const soundToPlay = soundsRef.current.find(s => s.id === data.soundId);
+                  if (soundToPlay) {
+                    playSoundLocally(soundToPlay);
+                  }
+                }, 50);
+              }
+            }
+          });
+
+          return () => {
+            unsubscribe();
+            pbUnsubscribe();
+          };
         } catch(e) {
           console.error("Firebase info:", e);
         }
@@ -721,7 +746,7 @@
       const totalSize = formatBytes(sounds.reduce((acc, s) => acc + (s.size || 0), 0));
       const filteredSounds = sounds.filter(s => s.name.toLowerCase().includes(searchFilter.toLowerCase()));
 
-      const playSound = (sound) => {
+      const playSoundLocally = (sound) => {
         if (audioRef.current) {
           audioRef.current.pause();
         }
@@ -732,11 +757,27 @@
         setPlayingId(sound.id);
         setLastPlayedName(sound.name);
 
-        audio.play().catch(() => addToast('Impossible de lire ce son', 'error'));
+        audio.play().catch((e) => {
+          console.error("Play error", e);
+          addToast('⚠️ Cliquez n importe où sur la page pour autoriser le son', 'error');
+        });
         audio.onended = () => {
           setPlayingId(null);
           audioRef.current = null;
         };
+      };
+
+      const triggerGlobalSound = async (sound) => {
+        try {
+          // Déclenche l'événement global sur Firebase au lieu de jouer le son localement
+          await db.collection("playback").doc("current").set({
+            soundId: sound.id,
+            timestamp: Date.now()
+          });
+        } catch(e) {
+          console.error("Erreur, on joue le son en mode local :", e);
+          playSoundLocally(sound);
+        }
       };
 
       const handleFileChange = async (e) => {
@@ -952,7 +993,7 @@
                     '--card-color': sound.color || COLORS[0].val,
                     '--card-shadow': (COLORS.find(c => c.val === (sound.color || COLORS[0].val)) || {}).shadow || 'rgba(0,0,0,0.15)'
                   }}
-                  onClick={() => playSound(sound)}
+                  onClick={() => triggerGlobalSound(sound)}
                 >
                   <button className="card-edit" title="Modifier" onClick={e => openEdit(sound, e)}>✏️</button>
                   <span className="buzzer-emoji">{sound.emoji || '🎵'}</span>
