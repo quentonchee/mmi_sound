@@ -936,16 +936,16 @@
 
               <div>
                 <div className="modal-label" style={{marginBottom:'8px'}}>Choisir un emoji</div>
-                <div className="emoji-picker">
+                <select 
+                  className="input-field" 
+                  style={{ width: '100%', fontSize: '1.2rem', textAlign: 'center', cursor: 'pointer' }}
+                  value={selectedEmoji}
+                  onChange={e => setSelectedEmoji(e.target.value)}
+                >
                   {EMOJIS.map(em => (
-                    <button 
-                      key={em} 
-                      type="button"
-                      className={`emoji-btn ${selectedEmoji === em ? 'selected' : ''}`}
-                      onClick={() => setSelectedEmoji(em)}
-                    >{em}</button>
+                     <option key={em} value={em}>{em}</option>
                   ))}
-                </div>
+                </select>
               </div>
 
               <div>
@@ -1097,11 +1097,16 @@
                 </div>
                 <div>
                   <div className="modal-label">Emoji</div>
-                  <div className="emoji-picker">
+                  <select 
+                    className="input-field" 
+                    style={{ width: '100%', fontSize: '1.2rem', textAlign: 'center', cursor: 'pointer' }}
+                    value={editEmoji}
+                    onChange={e => setEditEmoji(e.target.value)}
+                  >
                     {EMOJIS.map(em => (
-                      <button key={em} type="button" className={`emoji-btn ${editEmoji === em ? 'selected' : ''}`} onClick={() => setEditEmoji(em)}>{em}</button>
+                      <option key={em} value={em}>{em}</option>
                     ))}
-                  </div>
+                  </select>
                 </div>
                 <div>
                   <div className="modal-label">Couleur</div>
