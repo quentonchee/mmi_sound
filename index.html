@@ -679,6 +679,7 @@
       const [sounds, setSounds] = useState([]);
       const [toasts, setToasts] = useState([]);
       const [searchFilter, setSearchFilter] = useState('');
+      const [sortBy, setSortBy] = useState('date_desc');
       const [isUploadOpen, setIsUploadOpen] = useState(false);
       
       const [selectedEmoji, setSelectedEmoji] = useState(EMOJIS[0]);
@@ -735,7 +736,15 @@
       };
 
       const totalSize = formatBytes(sounds.reduce((acc, s) => acc + (s.size || 0), 0));
-      const filteredSounds = sounds.filter(s => s.name.toLowerCase().includes(searchFilter.toLowerCase()));
+      const filteredSounds = sounds
+        .filter(s => s.name.toLowerCase().includes(searchFilter.toLowerCase()))
+        .sort((a, b) => {
+          if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+          if (sortBy === 'emoji') return (a.emoji || '').localeCompare(b.emoji || '');
+          if (sortBy === 'color') return (a.color || '').localeCompare(b.color || '');
+          if (sortBy === 'date_asc') return new Date(a.addedAt || 0) - new Date(b.addedAt || 0);
+          return new Date(b.addedAt || 0) - new Date(a.addedAt || 0);
+        });
 
       const topWeekSounds = [...sounds]
         .filter(s => s.weeklyPlays && s.weeklyPlays[getWeekKey()] > 0)
@@ -957,16 +966,30 @@
               🎤 Buzzers Partagés
               <span className="badge">{sounds.length}</span>
             </div>
-            <div className="search-wrap">
-              <span className="search-icon">🔍</span>
-              <input 
-                type="text" 
-                id="searchInput"
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
+              <div className="search-wrap" style={{ flex: '1', minWidth: '150px', maxWidth: '240px' }}>
+                <span className="search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="searchInput"
+                  className="input-field" 
+                  placeholder="Rechercher..." 
+                  value={searchFilter}
+                  onChange={e => setSearchFilter(e.target.value)}
+                />
+              </div>
+              <select 
                 className="input-field" 
-                placeholder="Rechercher..." 
-                value={searchFilter}
-                onChange={e => setSearchFilter(e.target.value)}
-              />
+                style={{ width: 'auto', padding: '10px 14px', cursor: 'pointer', flexShrink: '0' }}
+                value={sortBy} 
+                onChange={e => setSortBy(e.target.value)}
+              >
+                <option value="date_desc">📅 Plus récents</option>
+                <option value="date_asc">📅 Plus anciens</option>
+                <option value="alpha">🔤 Alphabétique</option>
+                <option value="emoji">😀 Par Emoji</option>
+                <option value="color">🎨 Par Couleur</option>
+              </select>
             </div>
           </div>
 
