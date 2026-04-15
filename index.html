@@ -649,6 +649,14 @@
     ];
     const COLOR_SWATCHES = COLORS.map(c => c.val);
 
+    const getWeekKey = () => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+      const weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+      return d.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+    };
+
     const Toast = ({ toasts }) => (
       <div className="toast-container">
         {toasts.map(t => (
@@ -681,6 +689,7 @@
       const [editEmoji, setEditEmoji] = useState('');
       const [editColor, setEditColor] = useState('');
       const [editVolume, setEditVolume] = useState(100);
+      const [showTopWeek, setShowTopWeek] = useState(false);
 
       const addToast = (msg, type = 'success') => {
         const id = Date.now();
@@ -721,6 +730,11 @@
       const totalSize = formatBytes(sounds.reduce((acc, s) => acc + (s.size || 0), 0));
       const filteredSounds = sounds.filter(s => s.name.toLowerCase().includes(searchFilter.toLowerCase()));
 
+      const topWeekSounds = [...sounds]
+        .filter(s => s.weeklyPlays && s.weeklyPlays[getWeekKey()] > 0)
+        .sort((a, b) => b.weeklyPlays[getWeekKey()] - a.weeklyPlays[getWeekKey()])
+        .slice(0, 10);
+
       const playSound = (sound) => {
         if (audioRef.current) {
           audioRef.current.pause();
@@ -732,7 +746,17 @@
         setPlayingId(sound.id);
         setLastPlayedName(sound.name);
 
-        audio.play().catch(() => addToast('Impossible de lire ce son', 'error'));
+        audio.play().then(() => {
+          try {
+            const weekKey = getWeekKey();
+            db.collection("sounds").doc(sound.id).update({
+              [`weeklyPlays.${weekKey}`]: firebase.firestore.FieldValue.increment(1)
+            });
+          } catch(e) {
+            console.error("Erreur d'incrémentation:", e);
+          }
+        }).catch(() => addToast('Impossible de lire ce son', 'error'));
+
         audio.onended = () => {
           setPlayingId(null);
           audioRef.current = null;
@@ -854,7 +878,9 @@
 
           <div className="stats-bar">
             <div className="stat-chip">🎵 Sons enregistrés : <span>{sounds.length}</span></div>
-            
+            <div className="stat-chip" onClick={() => setShowTopWeek(true)} style={{cursor: 'pointer'}}>
+               🏆 Top de la semaine
+            </div>
           </div>
 
           <div className={`upload-collapse ${isUploadOpen ? 'open' : ''}`}>
@@ -971,6 +997,30 @@
           <button className={`fab-add ${isUploadOpen ? 'rotate' : ''}`} onClick={() => setIsUploadOpen(!isUploadOpen)}>➕</button>
           <footer>MMI SoundBoard &copy; 2026 · Quentin PERIGOT</footer>
           <Toast toasts={toasts} />
+
+          {/* Top Week Modal */}
+          <div className={`modal-overlay ${showTopWeek ? 'open' : ''}`} onClick={() => setShowTopWeek(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <h2>🏆 Top 10 de la Semaine</h2>
+              <div style={{display:'flex', flexDirection:'column', gap:'12px', marginBottom: '20px', maxHeight: '50vh', overflowY: 'auto', paddingRight: '5px'}}>
+                {topWeekSounds.length === 0 ? (
+                   <p style={{color:'var(--muted)', textAlign:'center', fontSize:'0.9rem'}}>Aucun son n'a encore été joué cette semaine !</p>
+                ) : (
+                   topWeekSounds.map((s, index) => (
+                     <div key={s.id} style={{display:'flex', alignItems:'center', gap:'12px', background:'var(--surface2)', padding:'10px 15px', borderRadius:'12px'}}>
+                       <div style={{fontSize:'1.2rem', fontWeight:'bold', color: index === 0 ? '#faad14' : index === 1 ? '#a0a0a0' : index === 2 ? '#cd7f32' : 'var(--muted)', width:'30px', textAlign:'center'}}>#{index + 1}</div>
+                       <div style={{fontSize:'1.8rem'}}>{s.emoji || '🎵'}</div>
+                       <div style={{flex:1, fontWeight:'600', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}} title={s.name}>{s.name}</div>
+                       <div className="badge" style={{background: 'var(--accent2)'}}>{s.weeklyPlays[getWeekKey()]} {s.weeklyPlays[getWeekKey()] > 1 ? 'écoutes' : 'écoute'}</div>
+                     </div>
+                   ))
+                )}
+              </div>
+              <div className="modal-actions" style={{justifyContent: 'center'}}>
+                <button className="btn btn-primary" onClick={() => setShowTopWeek(false)}>Fermer</button>
+              </div>
+            </div>
+          </div>
 
           {/* Edit Modal */}
           <div className={`modal-overlay ${editModalOpen ? 'open' : ''}`} onClick={() => setEditModalOpen(false)}>
