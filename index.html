@@ -686,6 +686,19 @@
       const [selectedColor, setSelectedColor] = useState(COLORS[0].val);
       const [customName, setCustomName] = useState('');
       
+      const [showIntroModal, setShowIntroModal] = useState(false);
+
+      useEffect(() => {
+        if (!localStorage.getItem('mmi_sound_intro')) {
+          setShowIntroModal(true);
+        }
+      }, []);
+
+      const closeIntroModal = () => {
+        localStorage.setItem('mmi_sound_intro', 'true');
+        setShowIntroModal(false);
+      };
+      
       const [playingId, setPlayingId] = useState(null);
       const [lastPlayedName, setLastPlayedName] = useState('–');
       const audioRef = useRef(null);
@@ -1048,6 +1061,27 @@
               </div>
               <div className="modal-actions" style={{justifyContent: 'center'}}>
                 <button className="btn btn-primary" onClick={() => setShowTopWeek(false)}>Fermer</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Intro Modal */}
+          <div className={`modal-overlay ${showIntroModal ? 'open' : ''}`}>
+            <div className="modal" onClick={e => e.stopPropagation()} style={{textAlign: 'center'}}>
+              <h2 style={{justifyContent: 'center', fontSize: '1.6rem'}}>👋 Bienvenue sur MMI SoundBoard !</h2>
+              <p style={{fontSize: '1rem', color: 'var(--text)', marginBottom: '16px', lineHeight: '1.5'}}>
+                Cette application vous permet de créer, écouter et partager vos sons préférés avec tout le monde ! 🌍
+              </p>
+              <ul style={{textAlign: 'left', background: 'var(--surface2)', padding: '16px 20px 16px 40px', borderRadius: '12px', marginBottom: '24px', fontSize: '0.95rem', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                <li><strong>Déposez</strong> des fichiers audio pour ajouter de nouveaux boutons.</li>
+                <li><strong>Personnalisez</strong> avec des emojis et des couleurs.</li>
+                <li><strong>Cliquez</strong> pour diffuser le son ou utilisez la recherche/tri ! 🔊</li>
+                <li>Profitez du <strong>Cloud</strong> : tout le monde partage la même bibliothèque !</li>
+              </ul>
+              <div className="modal-actions" style={{justifyContent: 'center'}}>
+                <button className="btn btn-primary" style={{width: '100%', fontSize: '1.05rem', padding: '14px 24px'}} onClick={closeIntroModal}>
+                  C'est compris, let's go ! 🚀
+                </button>
               </div>
             </div>
           </div>
