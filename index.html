@@ -204,6 +204,7 @@
     .color-row {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
     }
@@ -638,14 +639,20 @@
     }
     const db = firebase.firestore();
 
-    const EMOJIS = ['🎵','🎶','🔔','🎸','🥁','🎹','🎺','🎻','🎙','📯','🔊','💥','🎉','🚨','🌊','🌟','🔥','💫','🎮','🕹'];
-        const COLORS = [
-      { name: 'Rose',   val: '#FF76A5', shadow: '#D04073' },
-      { name: 'Bleu',   val: '#4EA0E2', shadow: '#2778B6' },
-      { name: 'Orange', val: '#FE6F17', shadow: '#C84F05' },
-      { name: 'Noir',   val: '#212529', shadow: '#000000' },
-      { name: 'Vert',   val: '#40c057', shadow: '#2b8a3e' },
-      { name: 'Violet', val: '#7c5cfc', shadow: '#5635D0' },
+    const EMOJIS = ['🎵','🎶','🔔','🎸','🥁','🎹','🎺','🎻','🎙','📯','🔊','💥','🎉','🚨','🌊','🌟','🔥','💫','🎮','🕹', '🚗', '🚑', '🚔', '💨', '🐓', '🐶', '🐱', '🐸', '🦆', '🐒', '👽', '👻', '💩', '💀', '🤡', '🤖', '💣', '😂', '😭', '🤯', '😱', '😡', '🤬', '👏', '👎', '👊', '✨', '⚡', '💧', '🌈'];
+    const COLORS = [
+      { name: 'Rose',     val: '#FF76A5', shadow: '#D04073' },
+      { name: 'Bleu',     val: '#4EA0E2', shadow: '#2778B6' },
+      { name: 'Orange',   val: '#FE6F17', shadow: '#C84F05' },
+      { name: 'Noir',     val: '#212529', shadow: '#000000' },
+      { name: 'Vert',     val: '#40c057', shadow: '#2b8a3e' },
+      { name: 'Violet',   val: '#7c5cfc', shadow: '#5635D0' },
+      { name: 'Rouge',    val: '#fa5252', shadow: '#c92a2a' },
+      { name: 'Jaune',    val: '#fcc419', shadow: '#e67700' },
+      { name: 'Cyan',     val: '#22b8cf', shadow: '#0b7285' },
+      { name: 'Menthe',   val: '#20c997', shadow: '#087f5b' },
+      { name: 'Indigo',   val: '#4c6ef5', shadow: '#364fc7' },
+      { name: 'Fuchsia',  val: '#e64980', shadow: '#a61e4d' }
     ];
     const COLOR_SWATCHES = COLORS.map(c => c.val);
 
